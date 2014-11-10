@@ -20,15 +20,16 @@
 #include <errno.h>
 #include <dirent.h>
 #include <math.h>
+
 #include <poll.h>
 #include <pthread.h>
-#include <stdlib.h>
 
 #include <linux/input.h>
 
+#include <cutils/atomic.h>
 #include <cutils/log.h>
 
-#include "sensors.h"
+#include "nusensors.h"
 
 #include "AccelSensor.h"
 #include "AkmSensor.h"
@@ -37,155 +38,6 @@
 #include "ProximitySensor.h"
 
 /*****************************************************************************/
-
-/*
- * The SENSORS Module
- */
-
-static const struct sensor_t sSensorList[] = {
-    {
-        "LIS3DH 3-axis Accelerometer",
-        "ST Microelectronics",
-        1,
-        ID_A,
-        SENSOR_TYPE_ACCELEROMETER,
-        MAX_RANGE_A,
-        CONVERT_A,
-        0.145f,
-        10000,
-        0,
-        0,
-        { 0 },
-    },
-    {
-        "AK8975 3-axis Magnetic field sensor",
-        "Asahi Kasei Microdevices",
-        1,
-        ID_M,
-        SENSOR_TYPE_MAGNETIC_FIELD,
-        1228.8f,
-        CONVERT_M,
-        0.35f,
-        10000,
-        0,
-        0,
-        { 0 },
-    },
-    {
-        "AKM Orientation sensor",
-        "Asahi Kasei Microdevices",
-        1,
-        ID_O,
-        SENSOR_TYPE_ORIENTATION,
-        360.0f,
-        CONVERT_O,
-        1.0f,
-        10000,
-        0,
-        0,
-        { 0 },
-    },
-#if 0
-    { "AKM Rotation vector sensor",
-        "Asahi Kasei Microdevices",
-        1,
-        ID_R,
-        SENSOR_TYPE_ROTATION_VECTOR,
-        34.907f,
-        CONVERT_R,
-        1.0f,
-        10000,
-        0,
-        0,
-        { 0 },
-    },
-#endif
-    {
-        "L3G4200D Gyroscope sensor",
-        "ST Microelectronics",
-        1,
-        ID_G,
-        SENSOR_TYPE_GYROSCOPE,
-        MAX_RANGE_G,
-        CONVERT_G,
-        6.1f,
-        2000,
-        0,
-        0,
-        { 0 },
-    },
-    {
-        "L3G4200D Temperature sensor",
-        "ST Microelectronics",
-        1,
-        ID_T,
-        SENSOR_TYPE_AMBIENT_TEMPERATURE,
-        85,
-        1,
-        6.1f,
-        2000,
-        0,
-        0,
-        { 0 },
-    },
-    {
-        "APDS-9900 Light sensor",
-        "Avago Technologies",
-        1,
-        ID_L,
-        SENSOR_TYPE_LIGHT,
-        60000.0f,
-        0.0125f,
-        0.20f,
-        1000,
-        0,
-        0,
-        { 0 },
-    },
-    {
-        "APDS-9900 Proximity sensor",
-        "Avago Technologies",
-        1,
-        ID_P,
-        SENSOR_TYPE_PROXIMITY,
-        1.0f,
-        1.0f,
-        3.0f,
-        1000,
-        0,
-        0,
-        { 0 },
-    },
-};
-
-static int open_sensors(const struct hw_module_t* module, const char* name,
-        struct hw_device_t** device);
-
-static int sensors__get_sensors_list(struct sensors_module_t* module,
-        struct sensor_t const** list)
-{
-    *list = sSensorList;
-    return ARRAY_SIZE(sSensorList);
-}
-
-static struct hw_module_methods_t sensors_module_methods = {
-    .open = open_sensors
-};
-
-struct sensors_module_t HAL_MODULE_INFO_SYM = {
-    .common = {
-        .tag = HARDWARE_MODULE_TAG,
-        .module_api_version = SENSORS_MODULE_API_VERSION_0_1,
-        .hal_api_version = HARDWARE_HAL_API_VERSION,
-        .id = SENSORS_HARDWARE_MODULE_ID,
-        .name = "U8860 Sensors Module",
-        .author = "The Android Open Source Project",
-        .methods = &sensors_module_methods,
-        .dso = 0,
-        .reserved = { 0 },
-    },
-    .get_sensors_list = sensors__get_sensors_list,
-};
 
 struct sensors_poll_context_t {
     struct sensors_poll_device_t device; // must be first
@@ -283,23 +135,9 @@ sensors_poll_context_t::~sensors_poll_context_t() {
 }
 
 int sensors_poll_context_t::activate(int handle, int enabled) {
-    int drv = handleToDriver(handle);
-    int err;
-
-    if (drv < 0) {
-        return drv;
-    }
-
-    err = mSensors[drv]->setEnable(handle, enabled);
-
-    if (err) {
-        return err;
-    }
-    /* Accelerometer for fusion data */
-    if ((handle == ID_O) ||
-        (handle == ID_R)) {
-        err = mSensors[lis3dh_acc]->setEnable(handle, enabled);
-    }
+    int index = handleToDriver(handle);
+    if (index < 0) return index;
+    int err =  mSensors[index]->setEnable(handle, enabled);
     if (enabled && !err) {
         const char wakeMessage(WAKE_MESSAGE);
         int result = write(mWritePipeFd, &wakeMessage, 1);
@@ -309,24 +147,10 @@ int sensors_poll_context_t::activate(int handle, int enabled) {
 }
 
 int sensors_poll_context_t::setDelay(int handle, int64_t ns) {
-    int drv = handleToDriver(handle);
-    int err;
 
-    if (drv < 0) {
-        return drv;
-    }
-
-    err = mSensors[drv]->setDelay(handle, ns);
-
-    if (err) {
-        return err;
-    }
-    /* Accelerometer for fusion data */
-    if ((handle == ID_O) ||
-        (handle == ID_R)) {
-        err = mSensors[lis3dh_acc]->setDelay(handle, ns);
-    }
-    return err;
+    int index = handleToDriver(handle);
+    if (index < 0) return index;
+    return mSensors[index]->setDelay(handle, ns);
 }
 
 int sensors_poll_context_t::pollEvents(sensors_event_t* data, int count)
@@ -343,9 +167,6 @@ int sensors_poll_context_t::pollEvents(sensors_event_t* data, int count)
                 if (nb < count) {
                     // no more data for this sensor
                     mPollFds[i].revents = 0;
-                }
-                if ((0 != nb) && (lis3dh_acc == i)) {
-                    static_cast<AkmSensor*>(mSensors[akm])->setAccel(&data[nb-1]);
                 }
                 count -= nb;
                 nbEvents += nb;
@@ -407,16 +228,14 @@ static int poll__poll(struct sensors_poll_device_t *dev,
 
 /*****************************************************************************/
 
-/** Open a new instance of a sensor device using name */
-static int open_sensors(const struct hw_module_t* module, const char* id,
-        struct hw_device_t** device)
+int init_nusensors(hw_module_t const* module, hw_device_t** device)
 {
     int status = -EINVAL;
-    sensors_poll_context_t *dev = new sensors_poll_context_t();
 
+    sensors_poll_context_t *dev = new sensors_poll_context_t();
     memset(&dev->device, 0, sizeof(sensors_poll_device_t));
 
-    dev->device.common.tag = HARDWARE_DEVICE_TAG;
+    dev->device.common.tag      = HARDWARE_DEVICE_TAG;
     dev->device.common.version  = SENSORS_DEVICE_API_VERSION_0_1;
     dev->device.common.module   = const_cast<hw_module_t*>(module);
     dev->device.common.close    = poll__close;
@@ -426,7 +245,5 @@ static int open_sensors(const struct hw_module_t* module, const char* id,
 
     *device = &dev->device.common;
     status = 0;
-
     return status;
 }
-
