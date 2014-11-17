@@ -62,3 +62,13 @@ system/etc/wifi/bcmdhd.cal
 
 # Bluetooth firmware
 system/vendor/firmware/bcm4329.hcd
+
+# Camera libraries
+system/lib/libchromatix_mt9e013_ar.so
+system/lib/libchromatix_mt9e013_default_video.so
+system/lib/libchromatix_mt9e013_preview.so
+system/lib/libchromatix_mt9e013_video_hfr.so
+system/lib/libgemini.so
+system/lib/libmmipl.so
+system/lib/libmmjpeg.so
+system/lib/liboemcamera.so
