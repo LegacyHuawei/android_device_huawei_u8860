@@ -18,6 +18,21 @@
 #ifndef ANDROID_RIL_V6_H
 #define ANDROID_RIL_V6_H
 
+typedef struct {
+    char *aidPtr;   /* AID value, See ETSI 102.221 8.1 and 101.220 4, NULL if no value. */
+    int command;    /* one of the commands listed for TS 27.007 +CRSM*/
+    int fileid;     /* EF id */
+    char *path;     /* "pathid" from TS 27.007 +CRSM command.
+                       Path is in hex asciii format eg "7f205f70"
+                       Path must always be provided.
+                     */
+    int p1;
+    int p2;
+    int p3;
+    char *data;     /* May be NULL*/
+    char *pin2;     /* May be NULL*/
+} RIL_SIM_IO_v4;
+
 #define RIL_REQUEST_IMS_REGISTRATION_STATE_V6 109
 #define RIL_REQUEST_IMS_SEND_SMS_V6 110
 #define RIL_REQUEST_GET_DATA_CALL_PROFILE_V6 111
