@@ -267,6 +267,8 @@ static UserCallbackInfo * internalRequestTimedCallback
     (RIL_TimedCallback callback, void *param,
         const struct timeval *relativeTime);
 
+#include "ril_v6.h"
+
 /** Index == requestNumber */
 static CommandInfo s_commands[] = {
 #include "ril_commands.h"
@@ -389,7 +391,8 @@ processCommandBuffer(void *buffer, size_t buflen) {
         return 0;
     }
 
-    if (request < 1 || request >= (int32_t)NUM_ELEMS(s_commands)) {
+    if (request < 1 || request >= (int32_t)NUM_ELEMS(s_commands) ||
+        s_commands[request].requestNumber == 0) {
         RLOGE("unsupported request code %d token %d", request, token);
         // FIXME this should perhaps return a response
         return 0;
@@ -724,13 +727,9 @@ invalid:
  */
 static void
 dispatchSIM_IO (Parcel &p, RequestInfo *pRI) {
-    union RIL_SIM_IO {
-        RIL_SIM_IO_v6 v6;
-        RIL_SIM_IO_v5 v5;
-    } simIO;
+    RIL_SIM_IO_v4 simIO;
 
     int32_t t;
-    int size;
     status_t status;
 
     memset (&simIO, 0, sizeof(simIO));
@@ -747,31 +746,31 @@ dispatchSIM_IO (Parcel &p, RequestInfo *pRI) {
 #endif
 
     status = p.readInt32(&t);
-    simIO.v6.command = (int)t;
+    simIO.command = (int)t;
 
     status = p.readInt32(&t);
-    simIO.v6.fileid = (int)t;
+    simIO.fileid = (int)t;
 
-    simIO.v6.path = strdupReadString(p);
-
-    status = p.readInt32(&t);
-    simIO.v6.p1 = (int)t;
+    simIO.path = strdupReadString(p);
 
     status = p.readInt32(&t);
-    simIO.v6.p2 = (int)t;
+    simIO.p1 = (int)t;
 
     status = p.readInt32(&t);
-    simIO.v6.p3 = (int)t;
+    simIO.p2 = (int)t;
 
-    simIO.v6.data = strdupReadString(p);
-    simIO.v6.pin2 = strdupReadString(p);
-    simIO.v6.aidPtr = strdupReadString(p);
+    status = p.readInt32(&t);
+    simIO.p3 = (int)t;
+
+    simIO.data = strdupReadString(p);
+    simIO.pin2 = strdupReadString(p);
+    simIO.aidPtr = strdupReadString(p);
 
     startRequest;
     appendPrintBuf("%scmd=0x%X,efid=0x%X,path=%s,%d,%d,%d,%s,pin2=%s,aid=%s", printBuf,
-        simIO.v6.command, simIO.v6.fileid, (char*)simIO.v6.path,
-        simIO.v6.p1, simIO.v6.p2, simIO.v6.p3,
-        (char*)simIO.v6.data,  (char*)simIO.v6.pin2, simIO.v6.aidPtr);
+        simIO.command, simIO.fileid, (char*)simIO.path,
+        simIO.p1, simIO.p2, simIO.p3,
+        (char*)simIO.data,  (char*)simIO.pin2, simIO.aidPtr);
 
     closeRequest;
     printRequest(pRI->token, pRI->pCI->requestNumber);
@@ -780,20 +779,19 @@ dispatchSIM_IO (Parcel &p, RequestInfo *pRI) {
         goto invalid;
     }
 
-    size = (s_callbacks.version < 6) ? sizeof(simIO.v5) : sizeof(simIO.v6);
-    s_callbacks.onRequest(pRI->pCI->requestNumber, &simIO, size, pRI);
+    s_callbacks.onRequest(pRI->pCI->requestNumber, &simIO, sizeof(simIO), pRI);
 
 #ifdef MEMSET_FREED
-    memsetString (simIO.v6.path);
-    memsetString (simIO.v6.data);
-    memsetString (simIO.v6.pin2);
-    memsetString (simIO.v6.aidPtr);
+    memsetString (simIO.path);
+    memsetString (simIO.data);
+    memsetString (simIO.pin2);
+    memsetString (simIO.aidPtr);
 #endif
 
-    free (simIO.v6.path);
-    free (simIO.v6.data);
-    free (simIO.v6.pin2);
-    free (simIO.v6.aidPtr);
+    free (simIO.path);
+    free (simIO.data);
+    free (simIO.pin2);
+    free (simIO.aidPtr);
 
 #ifdef MEMSET_FREED
     memset(&simIO, 0, sizeof(simIO));
@@ -3731,6 +3729,21 @@ processRadioState(RIL_RadioState newRadioState) {
     return newRadioState;
 }
 
+struct unsol_conv {
+    int old;
+    int curr;
+};
+
+static struct unsol_conv unsolResponse_conv[] = {
+    { RIL_UNSOL_RESPONSE_IMS_NETWORK_STATE_CHANGED_V6, RIL_UNSOL_RESPONSE_IMS_NETWORK_STATE_CHANGED },
+    { RIL_UNSOL_RESPONSE_TETHERED_MODE_STATE_CHANGED_V6, 0 },
+    { RIL_UNSOL_RESPONSE_DATA_NETWORK_STATE_CHANGED_V6, 0 },
+    { RIL_UNSOL_ON_SS_V6, 0 },
+    { RIL_UNSOL_STK_CC_ALPHA_NOTIFY_V6, 0 },
+    { RIL_UNSOL_UICC_SUBSCRIPTION_STATUS_CHANGED_V6, RIL_UNSOL_UICC_SUBSCRIPTION_STATUS_CHANGED },
+    { RIL_UNSOL_QOS_STATE_CHANGED_IND_V6, 0 }
+};
+
 extern "C"
 void RIL_onUnsolicitedResponse(int unsolResponse, const void *data,
                                 size_t datalen)
@@ -3740,6 +3753,17 @@ void RIL_onUnsolicitedResponse(int unsolResponse, const void *data,
     int64_t timeReceived = 0;
     bool shouldScheduleTimeout = false;
     RIL_RadioState newState;
+
+    for (int i = 0; i < (int)NUM_ELEMS(unsolResponse_conv); i++) {
+        if (unsolResponse_conv[i].old == unsolResponse) {
+            unsolResponse = unsolResponse_conv[i].curr;
+            RLOGD("RIL_onUnsolicitedResponse %d -> %d",
+                unsolResponse_conv[i].old, unsolResponse);
+            if (unsolResponse == 0) /* Unsupported */
+                return;
+            break;
+        }
+    }
 
     if (s_registerCalled == 0) {
         // Ignore RIL_onUnsolicitedResponse before RIL_register
