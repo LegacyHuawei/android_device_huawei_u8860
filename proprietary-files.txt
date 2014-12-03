@@ -22,7 +22,6 @@
 -system/lib/libaudioalsa.so
 
 # RIL
-system/bin/cnd
 system/bin/netmgrd
 system/bin/qmuxd
 system/lib/libril-qc-1.so
@@ -30,8 +29,6 @@ system/lib/libril-qc-1.so
 # RIL dependencies
 system/lib/libauth.so
 system/lib/libcm.so
-system/lib/libcneqmiutils.so
-system/lib/libcneutils.so
 system/lib/libdiag.so
 system/lib/libdsi_netctrl.so
 system/lib/libdsm.so
@@ -50,7 +47,6 @@ system/lib/libqueue.so
 system/lib/libril-qcril-hook-oem.so
 system/lib/libwms.so
 system/lib/libwmsts.so
-system/lib/libxml.so
 
 # Additional Huawei modem files
 system/bin/modempre
