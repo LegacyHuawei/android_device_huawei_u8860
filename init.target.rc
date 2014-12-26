@@ -15,15 +15,6 @@
 #
 
 on init
-    # IDEOS X5 Settings
-    chown system system /sys/devices/platform/msm_otg/mode
-    chown system system /sys/devices/platform/msm_hsusb/gadget/manual_chg_current
-
-    # HW Props
-    chown system system /sys/hwprops/btmac
-    chown system system /sys/hwprops/wlanmac
-    chown system system /sys/hwprops/reset
-
     # Bluetooth
     chown bluetooth net_bt_stack /proc/bluetooth/sleep/lpm
     chown bluetooth net_bt_stack /proc/bluetooth/sleep/btwrite
@@ -54,14 +45,6 @@ on init
     chmod 660 /sys/class/compass/akm8975/delay_mag
     chmod 660 /sys/class/compass/akm8975/delay_fusion
     chmod 220 /sys/class/compass/akm8975/accel
-
-on post-fs-data
-    mkdir /data/misc/hwprops 0770 system system
-    mkdir /data/misc/sensors 0770 system system
-
-service hwprops /system/bin/hwprops
-    class main
-    oneshot
 
 service akmdfs /system/bin/akmdfs -m7
      class late_start
