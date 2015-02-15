@@ -20,7 +20,7 @@ TARGET_SCREEN_HEIGHT := 854
 TARGET_SCREEN_WIDTH := 480
 
 # Custom tag for unofficial builds
-TARGET_UNOFFICIAL_BUILD_ID := Blefish
+TARGET_UNOFFICIAL_BUILD_ID := LegacyHuawei
 
 # Inherit some common CM stuff.
 $(call inherit-product, vendor/cm/config/common_full_phone.mk)
