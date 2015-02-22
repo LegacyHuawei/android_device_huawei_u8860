@@ -90,7 +90,7 @@ static const struct sensor_t sSensorList[] = {
     },
     {
         .name       = "L3G4200D Temperature sensor",
-        "ST Microelectronics",
+        .vendor     = "ST Microelectronics",
         .version    = 1,
         .handle     = ID_T,
         .type       = SENSOR_TYPE_AMBIENT_TEMPERATURE,
