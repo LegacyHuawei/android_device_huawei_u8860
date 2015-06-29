@@ -27,9 +27,6 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/languages_full.mk)
 $(call inherit-product, device/huawei/u8860/device.mk)
 
 # Set those variables here to overwrite the inherited values.
-PRODUCT_AAPT_CONFIG := normal hdpi
-PRODUCT_AAPT_PREF_CONFIG := hdpi
-
 PRODUCT_NAME := full_u8860
 PRODUCT_DEVICE := u8860
 PRODUCT_MODEL := U8860

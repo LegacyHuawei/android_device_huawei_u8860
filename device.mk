@@ -52,7 +52,3 @@ PRODUCT_PROPERTY_OVERRIDES += \
 	ro.telephony.call_ring.multiple=false \
 	rild.libpath=/system/lib/libril-qc-1.so \
 	rild.libargs=-d/dev/smd0
-
-# Recovery
-PRODUCT_PROPERTY_OVERRIDES += \
-	ro.cwm.forbid_format=/boot,/recovery,/cust
