@@ -17,6 +17,7 @@
 
 #define PROX_DEBUG 0
 
+#include <string.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <math.h>
