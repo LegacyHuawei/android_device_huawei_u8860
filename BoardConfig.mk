@@ -56,7 +56,7 @@ WIFI_DRIVER_FW_PATH_AP := "/vendor/firmware/fw_bcmdhd_apsta.bin"
 
 # Bluetooth
 BOARD_HAVE_BLUETOOTH_BCM := true
-BOARD_BLUEDROID_VENDOR_CONF := device/huawei/u8860/bluetooth/vnd_u8860.txt
+BOARD_CUSTOM_BT_CONFIG := device/huawei/u8860/bluetooth/vnd_u8860.txt
 BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := device/huawei/u8860/bluetooth
 
 # Kernel
