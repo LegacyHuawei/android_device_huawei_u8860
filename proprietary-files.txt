@@ -1,70 +1,51 @@
-#
-# Copyright (C) 2014  Rudolf Tammekivi <rtammekivi@gmail.com>
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-
-# If the library is needed to be linked to some other binary, please use "-" in
-# front of the library.
-
 # Audio
--system/lib/libaudcal.so
--system/lib/libaudioalsa.so
+-lib/libaudcal.so
+-lib/libaudioalsa.so
 
 # RIL
-system/bin/netmgrd
-system/bin/qmuxd
-system/lib/libril-qc-1.so
+bin/netmgrd
+bin/qmuxd
+lib/libril-qc-1.so
 
 # RIL dependencies
-system/lib/libauth.so
-system/lib/libcm.so
-system/lib/libdiag.so
-system/lib/libdsi_netctrl.so
-system/lib/libdsm.so
-system/lib/libdsutils.so
-system/lib/libhwrpc.so
-system/lib/libidl.so
-system/lib/libnetmgr.so
-system/lib/libnv.so
-system/lib/liboncrpc.so
-system/lib/libpbmlib.so
-system/lib/libqdi.so
-system/lib/libqdp.so
-system/lib/libqmiservices.so
-system/lib/libqmi.so
-system/lib/libqueue.so
-system/lib/libril-qcril-hook-oem.so
-system/lib/libwms.so
-system/lib/libwmsts.so
+lib/libauth.so
+lib/libcm.so
+lib/libdiag.so
+lib/libdsi_netctrl.so
+lib/libdsm.so
+lib/libdsutils.so
+lib/libhwrpc.so
+lib/libidl.so
+lib/libnetmgr.so
+lib/libnv.so
+lib/liboncrpc.so
+lib/libpbmlib.so
+lib/libqdi.so
+lib/libqdp.so
+lib/libqmiservices.so
+lib/libqmi.so
+lib/libqueue.so
+lib/libril-qcril-hook-oem.so
+lib/libwms.so
+lib/libwmsts.so
 
 # Additional Huawei modem files
-system/bin/modempre
-system/bin/oem_rpc_svc
-system/lib/liboem_rapi.so
+bin/modempre
+bin/oem_rpc_svc
+lib/liboem_rapi.so
 
 # Wi-Fi calibration
-system/etc/wifi/bcmdhd.cal
+etc/wifi/bcmdhd.cal
 
 # Bluetooth firmware
-system/vendor/firmware/bcm4329.hcd
+vendor/firmware/bcm4329.hcd
 
 # Camera libraries
-system/lib/libchromatix_mt9e013_ar.so
-system/lib/libchromatix_mt9e013_default_video.so
-system/lib/libchromatix_mt9e013_preview.so
-system/lib/libchromatix_mt9e013_video_hfr.so
-system/lib/libgemini.so
-system/lib/libmmipl.so
-system/lib/libmmjpeg.so
-system/lib/liboemcamera.so
+lib/libchromatix_mt9e013_ar.so
+lib/libchromatix_mt9e013_default_video.so
+lib/libchromatix_mt9e013_preview.so
+lib/libchromatix_mt9e013_video_hfr.so
+lib/libgemini.so
+lib/libmmipl.so
+lib/libmmjpeg.so
+lib/liboemcamera.so
