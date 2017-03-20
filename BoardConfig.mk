@@ -61,3 +61,6 @@ BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := device/huawei/u8860/bluetooth
 
 # Kernel
 TARGET_KERNEL_CONFIG := u8860_defconfig
+
+# Recovery
+DEVICE_RESOLUTION := 480x854
