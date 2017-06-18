@@ -22,7 +22,7 @@ TARGET_SCREEN_WIDTH := 480
 # Custom tag for unofficial builds
 TARGET_UNOFFICIAL_BUILD_ID := LegacyHuawei
 
-# Inherit some common CM stuff.
+# Inherit some common LineageOS stuff.
 $(call inherit-product, vendor/cm/config/common_full_phone.mk)
 
 # Inherit device configuration
@@ -30,7 +30,7 @@ $(call inherit-product, device/huawei/u8860/full_u8860.mk)
 
 ## Device identifier. This must come after all inclusions
 PRODUCT_DEVICE := u8860
-PRODUCT_NAME := cm_u8860
+PRODUCT_NAME := lineage_u8860
 PRODUCT_MODEL := Honor
 PRODUCT_BRAND := Huawei
 PRODUCT_MANUFACTURER := Huawei
